@@ -40,6 +40,24 @@ Doesn't affect or refer to the global state
     - Memory Usage
 
     Command Query separation is a way that we can deal with side effects in a clear way.
+
+    Exceptions hide the possiblities of a method
+    Using them to hand control flow 
+    Prefer using return values over exceptions
+
+    Exceptions are for exceptional situtations, never use thing in what you expect to happen
+
+    How to handle exceptions?
+    Fail fast - stop the current operation if anything wrong happens
+
+    Shortening the feedback look, confidence in the working software, protects the persistence state.
+
+    The most useful times to take advantage of exceptions.
+
+    At the top most level of the application, to log the exception, and shut the operation down. There should be no domain logic here.
+    The next is 3rd party libraries. In these cases can retry or say just try again. Catch these at the lowest level. Only catch the exceptions that you know 
+    how to handle, and nothing else.
+    Narrow the exceptions down the exception as far as possible.
 */
 
 

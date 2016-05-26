@@ -7,6 +7,77 @@ using System.Threading.Tasks;
 
 namespace FunctionalProgramming
 {
+    public class ApplicationService
+    {
+        private readonly string _directoryName;
+        private readonly AuditManager _auditManager = new AuditManager(10);
+        private readonly Persister _persister = new Persister();
+
+        public ApplicationService(string directoryName)
+        {
+            _directoryName = directoryName;
+        }
+
+        public void RemoveMentionsAbout(string visitorName)
+        {
+            var files = _persister.ReadDirectory(_directoryName);
+            var actions = _auditManager.RemoveMentionsAbout(visitorName, files);
+            _persister.ApplyChanges(actions);
+        }
+
+        public void AddRecord(string visitorName, DateTime timeOfVisit)
+        {
+            var fileInfo = new DirectoryInfo(_directoryName)
+                .GetFiles()
+                .OrderByDescending(x => x.LastWriteTime)
+                .First();
+
+            var file = _persister.ReadFile(fileInfo.Name);
+            var fileAction = _auditManager.AddRecord(file, visitorName, timeOfVisit);
+            _persister.ApplyChange(fileAction);
+        }
+    }
+
+    public class Persister
+    {
+        public FileContent ReadFile(string fileName)
+        {
+            return new FileContent(fileName, File.ReadAllLines(fileName));
+        }
+
+        public FileContent[] ReadDirectory(string directoryName)
+        {
+            return Directory
+                .GetFiles(directoryName)
+                .Select(x => ReadFile(x))
+                .ToArray();
+        }
+
+        public void ApplyChanges(IReadOnlyList<FileAction> actions)
+        {
+            foreach (var action in actions)
+            {
+                switch(action.Type)
+                {
+                    case ActionType.Create:
+                    case ActionType.Update:
+                        File.WriteAllLines(action.FileName, action.Content);
+                        continue;
+                    case ActionType.Delete:
+                        File.Delete(action.FileName);
+                        continue;
+                    default:
+                        throw new InvalidOperationException($"The action type {action.Type.ToString()} does not exist!");
+                }
+            }
+        }
+
+        public void ApplyChange(FileAction action)
+        {
+            ApplyChanges(new List<FileAction> { action });
+        }
+    }
+
     public class AuditManager
     {
         //private readonly int _maxEntriesPerFile;
@@ -123,10 +194,12 @@ namespace FunctionalProgramming
         {
             return files
                 .Select(file=> RemoveMentionsIn(file,visitorName))
+                .Where(action => action != null)
+                .Select(action => action.Value)
                 .ToList();
         }
 
-        private FileAction RemoveMentionsIn(FileContent file, string visitorName)
+        private FileAction? RemoveMentionsIn(FileContent file, string visitorName)
         {
             var entries = Parse(file.Content);
             var newContent = entries
@@ -134,10 +207,16 @@ namespace FunctionalProgramming
                 .Select((entry, index) => new AuditEntry(index + 1, entry.Visitor, entry.TimeOfVisit))
                 .ToList();
 
-            if(!newContent.Any())
+            if(entries.Count == newContent.Count)
             {
-                return new FileAction(file.FileName, new string[], ActionType.Delete);
+                return null;
             }
+
+            if (!newContent.Any())
+            {
+                return new FileAction(file.FileName, new string[0], ActionType.Delete);
+            }
+
 
             return new FileAction(file.FileName, Serialize(newContent), ActionType.Update);
         }

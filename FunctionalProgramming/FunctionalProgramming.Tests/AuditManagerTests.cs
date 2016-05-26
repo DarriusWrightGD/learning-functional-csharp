@@ -88,5 +88,19 @@ namespace FunctionalProgramming.Tests
             Assert.Equal("Audit_1.txt", actions[0].FileName);
             Assert.Equal(ActionType.Delete, actions[0].Type);
         }
+
+        [Fact]
+        public void RemoveMentionsAbout_does_not_do_anything_in_case_no_mentions_found()
+        {
+            var manager = new AuditManager(10);
+            var file = new FileContent("Audit_1.txt", new[]
+            {
+                "1;Peter Person;2016-04-06T16:30:00"
+            });
+
+            var actions = manager.RemoveMentionsAbout("Foo Bar", new[] { file });
+
+            Assert.Equal(0, actions.Count);
+        }
     }
 }
