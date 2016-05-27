@@ -58,6 +58,15 @@ Doesn't affect or refer to the global state
     The next is 3rd party libraries. In these cases can retry or say just try again. Catch these at the lowest level. Only catch the exceptions that you know 
     how to handle, and nothing else.
     Narrow the exceptions down the exception as far as possible.
+
+    Primitive obsession 
+    makes the code dishonest, and encourages code duplication
+    Create a separate class for each concept in your domain model.
+    Dont create classes for simple concepts, and always use value objects inside your domain model, convert them into primitives only once they have level the domain.
+
+    Avoiding nulls with the Maybe type
+    The inventor calls it his billion dollar mistake.
+    It is dishonest
 */
 
 
