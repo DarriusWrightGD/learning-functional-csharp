@@ -26,7 +26,7 @@ namespace FunctionalProgramming
             return Result.Ok();
         }
 
-        public static Result OnSucess(this Result result, Func<Result> func)
+        public static Result OnSuccess(this Result result, Func<Result> func)
         {
             if(result.IsFailure)
             {
