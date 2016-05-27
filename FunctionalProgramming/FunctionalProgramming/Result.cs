@@ -10,6 +10,7 @@ namespace FunctionalProgramming
     {
         public bool IsSuccess { get; }
         public ErrorType? Error { get;  }
+        public string ErrorMessage { get; }
         public bool IsFailure => !IsSuccess;
 
         protected Result(bool isSuccess, ErrorType? error)
@@ -19,6 +20,15 @@ namespace FunctionalProgramming
 
             IsSuccess = isSuccess;
             Error = error;
+        }
+
+        protected Result(bool isSuccess, string errorMessage)
+        {
+            if (isSuccess && errorMessage != null) throw new InvalidOperationException();
+            if (!isSuccess && errorMessage == null) throw new InvalidOperationException();
+
+            IsSuccess = isSuccess;
+            ErrorMessage = errorMessage;
         }
 
         public static Result Fail(ErrorType errorType)
@@ -31,16 +41,38 @@ namespace FunctionalProgramming
             return new Result<T>(default(T), false, errorType);
         }
 
+        public static Result Fail(string errorMessage)
+        {
+            return new Result(false, errorMessage);
+        }
+
+        public static Result<T> Fail<T>(string errorMessage)
+        {
+            return new Result<T>(default(T), false, errorMessage);
+        }
+
         public static Result Ok()
         {
-            return new Result(true, null);
+            return new Result(true, (string)null);
         }
 
 
         public static Result<T> Ok<T>(T value)
         {
-            return new Result<T>(value,true, null);
+            return new Result<T>(value,true, (string)null);
         }
+
+        public static Result Combine(params Result [] results)
+        {
+            foreach (var result in results)
+            {
+                if (result.IsFailure)
+                    return result;
+            }
+
+            return Ok();
+        }
+
     }
 
     public class Result<T> : Result
@@ -62,6 +94,12 @@ namespace FunctionalProgramming
         {
             _value = value;
         }
+
+        protected internal Result(T value, bool isSuccess, string error)
+            : base(isSuccess, error)
+        {
+            _value = value;
+        }
     }
 
     public enum ErrorType
@@ -71,6 +109,7 @@ namespace FunctionalProgramming
         CannotReservePastDate,
         IncorrectCustomerName,
         UnableToConnnect,
-        TicketsAreNoLongerAvailable
+        TicketsAreNoLongerAvailable,
+        InvalidMoneyAmount
     }
 }

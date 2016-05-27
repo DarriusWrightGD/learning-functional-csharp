@@ -36,17 +36,22 @@ namespace FunctionalProgramming
         {
             //save ticket
         }
+
+        public Maybe<Ticket> Get(int id)
+        {
+            return new Ticket(DateTime.Today, "foobar");
+        }
     }
 
     public class Ticket
     {
-        private string customerName;
-        private DateTime date;
+        public readonly string CustomerName;
+        public readonly DateTime Date;
 
         public Ticket(DateTime date, string customerName)
         {
-            this.date = date;
-            this.customerName = customerName;
+            Date = date;
+            CustomerName = customerName;
         }
     }
 
@@ -66,14 +71,14 @@ namespace FunctionalProgramming
         {
             var validationResult = Validate(date, customerName);
 
-            if(validationResult.IsFailure)
+            if (validationResult.IsFailure)
             {
                 return "Validation failed";
             }
 
             var reserveResult = _gateway.Reserve(date, customerName);
 
-            if(reserveResult.IsFailure)
+            if (reserveResult.IsFailure)
             {
                 return "Reservation failed";
             }
@@ -81,6 +86,16 @@ namespace FunctionalProgramming
             var ticket = new Ticket(date, customerName);
             _repository.Save(ticket);
             return "Success";
+        }
+
+        public string GetTicket(int id)
+        {
+            var ticket = _repository.Get(id);
+
+            if (ticket.HasNoValue)
+                return "Ticket not found";
+
+            return ticket.Value.CustomerName;
         }
 
         private Result Validate(DateTime date, string customerName)

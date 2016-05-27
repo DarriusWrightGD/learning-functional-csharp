@@ -20,11 +20,18 @@ namespace FunctionalProgramming
     {
         public string Name { get; }
         public Address Address { get; }
+        public decimal Balance { get; private set; }
+        public BillingInfo BillingInfo { get; set; }
 
         public Customer(string name, Address address)
         {
             Name = name;
             Address = address;
+        }
+
+        public void AddBalance(MoneyToCharge amount)
+        {
+            Balance += amount;
         }
     }
 

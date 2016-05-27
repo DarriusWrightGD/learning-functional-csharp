@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NullGuard;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,12 +26,12 @@ namespace FunctionalProgramming
 
         public bool HasNoValue => !HasValue;
 
-        private Maybe(T value)
+        private Maybe([AllowNull]T value)
         {
             _value = value;
         }
 
-        public static implicit operator Maybe<T>(T value)
+        public static implicit operator Maybe<T>([AllowNull]T value)
         {
             return new Maybe<T>(value);
         }
@@ -56,6 +57,22 @@ namespace FunctionalProgramming
 
             var other = (Maybe<T>)obj;
             return Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return _value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return (HasValue) ? _value.ToString() : "No Value";
+        }
+
+        [return:AllowNull]
+        public T Unwarp([AllowNull]T defaultValue = default(T))
+        {
+            return (HasValue) ? Value : defaultValue;
         }
 
         public bool Equals(Maybe<T> other)

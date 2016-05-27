@@ -67,6 +67,9 @@ Doesn't affect or refer to the global state
     Avoiding nulls with the Maybe type
     The inventor calls it his billion dollar mistake.
     It is dishonest
+
+    The null fody only should be used on your domain model assembily, and when recieving values from the asp.net layer you need to implicitly convert the value to 
+    a maybe.1
 */
 
 
